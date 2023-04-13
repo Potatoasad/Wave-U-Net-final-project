@@ -1,4 +1,4 @@
-# Project Template
+# Wave U Net architecture for music source seperation | CSE 382M final project
 Here's a simple template with a Makefile. This gives you:
 
 1. A self contained environment in which you can run notebooks
