@@ -12,6 +12,8 @@ This repository gives everyone a:
 1. A self contained environment in which you can run notebooks
 2. Allows you to work on a package inside the `\scripts` folder, where you can save functions/classes you want to use inside the jupyter notebook (this keeps your notebook relatively clean and free of a cascade of initial function defintions)
 
+Here are the steps needed to use this notebook:
+
 #### Initial Install
 First add whatever packages you will need inside the `requirements.txt`
 
