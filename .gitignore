@@ -20,6 +20,7 @@ __pycache__/
 *.toc
 *.mp4
 *.wav
+*.mp3
 /jupyter
 
 # C extensions

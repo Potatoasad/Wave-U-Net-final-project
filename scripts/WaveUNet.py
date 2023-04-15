@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 class DownsamplingBlock(nn.Module):
     def __init__(self, input_channels, output_channels, kernel_size=15, downsampling=2):
@@ -44,9 +45,13 @@ class UpsamplingBlock(nn.Module):
         return x
 
 class FinalLayer(nn.Module):
-    def __init__(self, input_channels, output_channels, short_channels, kernel_size=1, other_audio_index=2):
+    def __init__(self, input_channels, output_channels, short_channels, kernel_size=1, other_audio_index=2, mono=True):
         super(FinalLayer, self).__init__()
-        self.conv1 = nn.ConvTranspose1d(in_channels=(input_channels + short_channels), out_channels=output_channels-1, kernel_size=kernel_size, stride=1, padding=(kernel_size)//2)
+        if mono:
+            self.remove_channel = 1
+        else:
+            self.remove_channel = 2
+        self.conv1 = nn.ConvTranspose1d(in_channels=(input_channels + short_channels), out_channels=output_channels-self.remove_channel, kernel_size=kernel_size, stride=1, padding=(kernel_size)//2)
         self.tanh = nn.Tanh()
         self.other_audio_index = other_audio_index
         
@@ -107,13 +112,14 @@ def create_up(up_tuple):
     
 
 class WaveUNet(nn.Module):
-    def __init__(self, L=5, Fc=16, in_channels=1, out_channels=4):
+    def __init__(self, L=5, Fc=16, in_channels=1, out_channels=4, mono=True):
         super(WaveUNet, self).__init__()
+        self.mono = mono
         downs, bottle, final, ups = design_unet(L, Fc, in_channels, out_channels)
         validate_u_net(downs, bottle, final, ups, in_channels, out_channels)
         self.DSBs = nn.ModuleList([create_down(d) for d in downs])
         self.USPs = nn.ModuleList([create_up(u) for u in ups])
-        self.FL = nn.ModuleList([FinalLayer(input_channels=final[0], short_channels=final[1], output_channels=final[2], kernel_size=1)])
+        self.FL = nn.ModuleList([FinalLayer(input_channels=final[0], short_channels=final[1], output_channels=final[2], kernel_size=1, mono=mono)])
         self.bottle_neck = nn.ModuleList([BottleNeckConv(input_channels=bottle[0], output_channels=bottle[1])])
         
     def forward(self, X0):
